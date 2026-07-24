@@ -72,3 +72,8 @@ def valida_questao(questao):
                     retorno['opcoes'] = vazias
 
     return retorno
+
+import random
+
+def sorteia_questao(questoes, nivel):
+    return random.choice(questoes[nivel])
