@@ -77,3 +77,18 @@ import random
 
 def sorteia_questao(questoes, nivel):
     return random.choice(questoes[nivel])
+
+import random
+
+def sorteia_questao_inedita(questoes, nivel, questoes_sorteadas):
+
+    indice = random.randint(0, len(questoes[nivel]) - 1)
+    questao = questoes[nivel][indice]
+
+    while questao in questoes_sorteadas:
+        indice = random.randint(0, len(questoes[nivel]) - 1)
+        questao = questoes[nivel][indice]
+
+    questoes_sorteadas.append(questao)
+
+    return questao
