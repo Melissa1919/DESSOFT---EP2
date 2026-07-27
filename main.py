@@ -18,7 +18,7 @@ import json
 from funcoes import (
     transforma_base,
     valida_questao,
-    valida_lista_questoes,
+    valida_questoes,
     sorteia_questao,
     sorteia_questao_inedita,
     questao_para_texto,
