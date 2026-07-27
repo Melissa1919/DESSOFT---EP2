@@ -1,3 +1,17 @@
+"""
+Fortuna DesSoft - EP2
+Jogo de perguntas e respostas estilo "Show do Milhão".
+ 
+Usa as 7 funções obrigatórias implementadas em funcoes.py:
+- transforma_base
+- valida_questao
+- valida_lista_questoes
+- sorteia_questao
+- sorteia_questao_inedita
+- questao_para_texto
+- gera_ajuda
+"""
+
 
 import json
 
