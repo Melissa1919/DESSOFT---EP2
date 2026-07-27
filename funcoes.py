@@ -73,6 +73,16 @@ def valida_questao(questao):
 
     return retorno
 
+def valida_questoes(questoes):
+    retorno = []
+
+    i = 0
+    while i < len(questoes):
+        retorno.append(valida_questao(questoes[i]))
+        i += 1
+
+    return retorno
+
 import random
 
 def sorteia_questao(questoes, nivel):
