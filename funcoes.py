@@ -105,3 +105,28 @@ def questao_para_texto(questao, id):
         texto = texto + "\n" + letra + ": " + resposta
 
     return texto
+
+from random import randint
+
+def gera_ajuda(questao):
+
+    erradas = []
+
+    for letra in questao["opcoes"]:
+        if letra != questao["correta"]:
+            erradas.append(questao["opcoes"][letra])
+
+    quantidade = randint(1, 2)
+
+    if quantidade == 1:
+        i = randint(0, len(erradas)-1)
+        return "DICA:\nOpções certamente erradas: " + erradas[i]
+
+    else:
+        i = randint(0, len(erradas)-1)
+        j = randint(0, len(erradas)-1)
+
+        while i == j:
+            j = randint(0, len(erradas)-1)
+
+        return "DICA:\nOpções certamente erradas: " + erradas[i] + " e " + erradas[j]
