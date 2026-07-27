@@ -1,25 +1,22 @@
 """
 Fortuna DesSoft - EP2
 Jogo de perguntas e respostas estilo "Show do Milhão".
- 
+
 Usa as 7 funções obrigatórias implementadas em funcoes.py:
 - transforma_base
 - valida_questao
-- valida_lista_questoes
+- valida_questoes
 - sorteia_questao
 - sorteia_questao_inedita
 - questao_para_texto
 - gera_ajuda
 """
 
-
 import json
 
 from funcoes import (
     transforma_base,
-    valida_questao,
     valida_questoes,
-    sorteia_questao,
     sorteia_questao_inedita,
     questao_para_texto,
     gera_ajuda,
@@ -42,7 +39,7 @@ AJUDAS_INICIAIS = 2
 OPCOES_VALIDAS = ["A", "B", "C", "D", "PULA", "AJUDA"]
 
 # ---------------------------------------------------------------------------
-# Cores 
+# Cores
 # ---------------------------------------------------------------------------
 
 RESET = "\033[0m"
@@ -83,23 +80,50 @@ def formata_dinheiro(valor):
 
 
 # ---------------------------------------------------------------------------
-# Carregamento 
+# Carregamento e validação da base
 # ---------------------------------------------------------------------------
+
+def valida_base_jogo(base_por_nivel):
+    """Confere se a base tem os níveis necessários para o jogo."""
+    problemas = []
+
+    for nivel in ["facil", "medio", "dificil"]:
+        if nivel not in base_por_nivel:
+            problemas.append(f"nível '{nivel}' ausente")
+        elif len(base_por_nivel[nivel]) < 3:
+            problemas.append(f"nível '{nivel}' possui menos de 3 questões")
+
+    return problemas
+
 
 def carrega_base(caminho):
     """Lê o arquivo json, valida a lista de questões e organiza por nível."""
     with open(caminho, "r", encoding="utf-8") as arquivo:
         questoes = json.load(arquivo)
 
-    erros = valida_lista_questoes(questoes)
+    erros = valida_questoes(questoes)
 
-    if len(erros) > 0:
+    problemas = []
+    for indice, erro in enumerate(erros):
+        if erro != {}:
+            problemas.append((indice + 1, erro))
+
+    if len(problemas) > 0:
         imprime_erro("A base de perguntas está inconsistente. Erros encontrados:")
-        for indice, erro in erros.items():
+        for indice, erro in problemas:
             print(f"  Questão {indice}: {erro}")
         raise SystemExit(1)
 
-    return transforma_base(questoes)
+    base_por_nivel = transforma_base(questoes)
+
+    problemas_base = valida_base_jogo(base_por_nivel)
+    if len(problemas_base) > 0:
+        imprime_erro("A base de perguntas não possui questões suficientes para o jogo:")
+        for problema in problemas_base:
+            print(f"  - {problema}")
+        raise SystemExit(1)
+
+    return base_por_nivel
 
 
 # ---------------------------------------------------------------------------
@@ -127,21 +151,18 @@ Olá, {nome}! As regras são simples:
 - A cada resposta correta, seu prêmio aumenta, seguindo esta escada:
   {", ".join(formata_dinheiro(p) for p in PREMIOS)}
 - Se errar uma pergunta, perde tudo e o jogo acaba na hora.
-- Você tem {PULOS_INICIAIS} pulos: pode pular uma pergunta (ela não conta
-  como erro, mas também não aumenta o prêmio) e receber outra pergunta
+- Você tem {PULOS_INICIAIS} pulos: pode pular uma pergunta e receber outra
   do mesmo nível.
 - Você tem {AJUDAS_INICIAIS} ajudas: ao usar, o jogo revela 1 ou 2
-  alternativas erradas. Só é possível usar 1 ajuda por pergunta.
+  alternativas erradas.
 - Ao acertar qualquer pergunta, você pode escolher parar e sair com o
   prêmio atual, ou continuar para o próximo valor.
-- Ao chegar em R$ 1.000.000, o jogo termina automaticamente e você
-  vence!
+- Ao chegar em R$ 1.000.000, o jogo termina automaticamente e você vence!
 """)
 
 
 def pede_entrada():
-    entrada = input("\nResposta (A, B, C ou D), PULA ou AJUDA: ").strip().upper()
-    return entrada
+    return input("\nResposta (A, B, C ou D), PULA ou AJUDA: ").strip().upper()
 
 
 def responde_questao(questao, estado):
@@ -185,18 +206,17 @@ def responde_questao(questao, estado):
         # entrada é A, B, C ou D
         if entrada == questao["correta"]:
             return "correta"
-        else:
-            return "errada"
+        return "errada"
 
 
 def joga_partida(base_por_nivel):
     """Joga uma partida completa. Retorna o prêmio final conquistado."""
-
     estado = {
         "pulos": PULOS_INICIAIS,
         "ajudas": AJUDAS_INICIAIS,
         "indice_exibicao": 0,
     }
+
     questoes_sorteadas = []
     premio_atual = 0
 
@@ -215,7 +235,6 @@ def joga_partida(base_por_nivel):
             resultado = responde_questao(questao, estado)
 
             if resultado == "pula":
-                # sorteia outra pergunta do mesmo nível
                 continue
             break
 
